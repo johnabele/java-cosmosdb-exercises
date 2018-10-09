@@ -49,11 +49,11 @@ public class AccountSettings {
             System.getProperty("ACCOUNT_KEY", 
                     StringUtils.defaultString(StringUtils.trimToNull(
                             System.getenv().get("ACCOUNT_KEY")),
-                            "9k0kubcJPYEyCW3LlmIoLBlfhz8GZnJ8OBZ45hoO0b5aElISaIa0Ryn4qwUyTFm4XxZNUociidRAEoYUA2NFCg=="));
+                            "<ADD ACCOUNT KEY>"));
 
     public static String HOST =
             System.getProperty("ACCOUNT_HOST",
                     StringUtils.defaultString(StringUtils.trimToNull(
                             System.getenv().get("ACCOUNT_HOST")),
-                            "https://jabcos.documents.azure.com:443/"));
+                            "<ADD HOST URI>"));
 }

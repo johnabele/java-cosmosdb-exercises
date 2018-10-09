@@ -14,8 +14,8 @@ public class QueryManager {
     public static AsyncDocumentClient client;
     
     // Assign a variable for your database & collection 
-    private static final String databaseName = "AzureSampleFamilyDB";
-    private static final String collectionName = "FamilyCollection";
+    private static final String databaseName = "<DatabaseName>";
+    private static final String collectionName = "<CollectionName>";
     private String collectionLink;
     private FeedOptions queryOptions = new FeedOptions();
 
@@ -34,31 +34,32 @@ public class QueryManager {
     }
 
     public void QueryWithOneFilter() throws IOException{
-        String queryText = "SELECT * FROM c WHERE c.name = 'Dorothy Romero'";
+        //TODO Add one filter query text below
+        String queryText = "";
         
         OutputResults(queryText);
     }
     public void QueryWithTwoFilters() throws IOException{
         //TODO Add two filter query text below
-        String queryText = "SELECT * FROM c WHERE c.name = 'Dorothy Romero' OR c.balance = '$1,444.96'";
+        String queryText = "";
         
         OutputResults(queryText);
     }
     public void QueryWithRangeOperator() throws IOException{
         //TODO Add range operator query text below
-        String queryText = "SELECT * FROM c WHERE c.registered >= '2017-02-18T05:49:33 +4:00'";
+        String queryText = "";
 
         OutputResults(queryText);
     }
     public void QueryWithSingleJoin() throws IOException{
         //TODO Add single join query text below
-        String queryText = "SELECT f.id FROM customers f JOIN c IN f.companies";
+        String queryText = "";
         
         OutputResults(queryText);
     }
     public void QueryWithDoubleJoin() throws IOException{
         //TODO Add double join query text below
-        String queryText = "SELECT f.name AS customer, c.companyName AS company, p.location AS location FROM customers f JOIN c IN f.companies JOIN p IN c.locations";
+        String queryText = "";
         
         OutputResults(queryText);
     }

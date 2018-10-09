@@ -59,43 +59,11 @@ public class Main {
         QueryManager queryManager = new QueryManager();
         
         try{
-            queryManager.QueryWithOneFilter();
-            queryManager.QueryWithTwoFilters();
-            queryManager.QueryWithRangeOperator();
-            queryManager.QueryWithSingleJoin();
-            queryManager.QueryWithDoubleJoin();
+            //Add QueryManager call here
+
 
         }catch(Exception ex){
             System.out.println("An error occurred.");
         }  
-    }
-    
-    public void writeDoc_Async() throws Exception{
-        client = new AsyncDocumentClient.Builder()
-        .withServiceEndpoint(AccountSettings.HOST)
-        .withMasterKey(AccountSettings.MASTER_KEY)
-        .withConnectionPolicy(ConnectionPolicy.GetDefault())
-        .withConsistencyLevel(ConsistencyLevel.Session)
-        .build();
-
-        Document doc = new Document(String.format("{ 'id': 'doc%d', 'counter': '%d'}", 2, 2));
-        String collectionLink = String.format("/dbs/%s/colls/%s", databaseName, collectionName);
-        Observable<ResourceResponse<Document>> createDocumentObservable = client
-                .createDocument(collectionLink, doc, null, true);
-
-        final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
-
-        // Subscribe to Document resource response emitted by the observable
-        createDocumentObservable.single() // We know there will be one response
-                .subscribe(documentResourceResponse -> {
-                    System.out.println(documentResourceResponse.getActivityId() + " RUs charged: " + documentResourceResponse.getRequestCharge());
-                    successfulCompletionLatch.countDown();
-                }, error -> {
-                    System.err.println(
-                            "an error occurred while creating the document: actual cause: " + error.getMessage());
-                });
-
-        // Wait till document creation completes
-        successfulCompletionLatch.await();
     }
 }
