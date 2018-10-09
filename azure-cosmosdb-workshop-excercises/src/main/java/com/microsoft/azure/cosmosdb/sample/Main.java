@@ -47,35 +47,55 @@ import rx.Observable;
 
 public class Main {
 
-    private AsyncDocumentClient client;
+    public static final String databaseName = "AzureSampleFamilyDB";
+    public static final String collectionName = "FamilyCollection";
+    
+    private static AsyncDocumentClient client;
     /*
      * 
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) {   
+        QueryManager queryManager = new QueryManager();
+        
+        try{
+            queryManager.QueryWithOneFilter();
+            queryManager.QueryWithTwoFilters();
+            queryManager.QueryWithRangeOperator();
+            queryManager.QueryWithSingleJoin();
+            queryManager.QueryWithDoubleJoin();
 
-        Main p = new Main();
-
-        try {  
-            p.getStartedDemo();
-            System.out.println(String.format("Demo complete, please hold while resources are deleted"));
-        } catch (Exception e) {
-            System.out.println(String.format("DocumentDB GetStarted failed with %s", e));
-        } finally {
-            System.out.println("closing the client");
-            p.client.close();
-            System.exit(0);
-        }
+        }catch(Exception ex){
+            System.out.println("An error occurred.");
+        }  
     }
-
-    private void getStartedDemo() throws Exception {
-        System.out.println("Using Azure Cosmos DB endpoint: " + AccountSettings.HOST);
-
+    
+    public void writeDoc_Async() throws Exception{
         client = new AsyncDocumentClient.Builder()
-                .withServiceEndpoint(AccountSettings.HOST)
-                .withMasterKey(AccountSettings.MASTER_KEY)
-                .withConnectionPolicy(ConnectionPolicy.GetDefault())
-                .withConsistencyLevel(ConsistencyLevel.Session)
-                .build();
+        .withServiceEndpoint(AccountSettings.HOST)
+        .withMasterKey(AccountSettings.MASTER_KEY)
+        .withConnectionPolicy(ConnectionPolicy.GetDefault())
+        .withConsistencyLevel(ConsistencyLevel.Session)
+        .build();
+
+        Document doc = new Document(String.format("{ 'id': 'doc%d', 'counter': '%d'}", 2, 2));
+        String collectionLink = String.format("/dbs/%s/colls/%s", databaseName, collectionName);
+        Observable<ResourceResponse<Document>> createDocumentObservable = client
+                .createDocument(collectionLink, doc, null, true);
+
+        final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
+
+        // Subscribe to Document resource response emitted by the observable
+        createDocumentObservable.single() // We know there will be one response
+                .subscribe(documentResourceResponse -> {
+                    System.out.println(documentResourceResponse.getActivityId() + " RUs charged: " + documentResourceResponse.getRequestCharge());
+                    successfulCompletionLatch.countDown();
+                }, error -> {
+                    System.err.println(
+                            "an error occurred while creating the document: actual cause: " + error.getMessage());
+                });
+
+        // Wait till document creation completes
+        successfulCompletionLatch.await();
     }
 }
