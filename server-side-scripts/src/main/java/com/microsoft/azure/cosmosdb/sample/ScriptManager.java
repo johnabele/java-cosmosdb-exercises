@@ -96,49 +96,18 @@ public class ScriptManager {
 
     public void RunSimpleScript() throws IOException, InterruptedException{
         // 1. Create stored procedure for script.
-        ClassLoader classLoader = getClass().getClassLoader();        
-        File file = new File(classLoader.getResource("JS/SimpleScript.js").getFile());
 
-        String scriptBody = new String(Files.readAllBytes(Paths.get(file.getPath())), StandardCharsets.UTF_8);
-        String scriptId = file.getName();
+            //Add step 1 code here.
 
-        StoredProcedure sproc = new StoredProcedure();
-        sproc.setId(FilenameUtils.removeExtension(scriptId));
-        sproc.setBody(scriptBody);
-
-        TryDeleteStoredProcedure(collectionLink + "/sprocs/" + sproc.getId(), sproc.getId());
-
-        client.createStoredProcedure(collectionLink, sproc, null).subscribe(spResultPage -> {
-            System.out.println("\n" + "Stored procedure created " + spResultPage.getActivityId() + "\n");
-        });
         // 2. Create a document.
 
-        String jsonString = "{'LastName':'Estel','Headquarters':'Russia','Locations': {'Country':'Russia','City':'Novosibirsk'},'Income':'50000'}";
-        Document document = new Document(jsonString);
+            //Add step 2 code here.
         
-        Observable<ResourceResponse<Document>> createDocumentObservable = 
-        client.createDocument(collectionLink, document, null, false);
-
-        createDocumentObservable.single() // We know there is only single result
-        .subscribe(documentResourceResponse -> {
-            System.out.println("Document created " + documentResourceResponse.getActivityId() + "\n");
-        }, error -> {
-            System.err.println(
-                    "an error occurred while creating the document: actual cause: " + error.getMessage());
-        });
         // 3. Run the script. Pass "Hello, " as parameter. 
+        TimeUnit.SECONDS.sleep(1);
         // The script will take the 1st document and echo: Hello, <document as json>.
-        Object[] storedProcedureArgs = new Object[] { "Hello" };
-        TimeUnit.SECONDS.sleep(5);
-        client.executeStoredProcedure(collectionLink + "/sprocs/" + sproc.getId(), storedProcedureArgs)
-        .subscribe(storedProcedureResponse -> {
-            String storedProcResultAsString = storedProcedureResponse.getResponseAsString();
-            successfulCompletionLatch.countDown();
-            System.out.println(storedProcResultAsString);
-        }, error -> {
-            System.err.println("an error occurred while executing the stored procedure: actual cause: "
-                    + error.getMessage());
-        });
+
+            //Add step 3 code here.
     }
     
     private void cleanUpGeneratedDatabases() {
