@@ -35,7 +35,8 @@ public class Main {
         
         try{
             //Add ScriptManager call here
-            scriptManager.RunSimpleScript();
+            //scriptManager.RunSimpleScript();
+            scriptManager.RunPostTrigger();
 
         }catch(Exception ex){
             System.out.println("An error occurred. \n" + ex.getMessage() + "\n ");

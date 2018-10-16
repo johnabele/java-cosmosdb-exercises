@@ -22,25 +22,14 @@
  */
 package com.microsoft.azure.cosmosdb.sample;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import javax.swing.JSlider;
-import javax.tools.JavaFileObject;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.microsoft.azure.cosmosdb.ConnectionPolicy;
 import com.microsoft.azure.cosmosdb.ConsistencyLevel;
 import com.microsoft.azure.cosmosdb.Database;
@@ -53,7 +42,6 @@ import com.microsoft.azure.cosmosdb.SqlParameter;
 import com.microsoft.azure.cosmosdb.SqlParameterCollection;
 import com.microsoft.azure.cosmosdb.SqlQuerySpec;
 import com.microsoft.azure.cosmosdb.StoredProcedure;
-import com.microsoft.azure.cosmosdb.StoredProcedureResponse;
 import com.microsoft.azure.cosmosdb.rx.AsyncDocumentClient;
 
 import org.apache.commons.io.FilenameUtils;
@@ -68,11 +56,9 @@ public class ScriptManager {
     private static final String databaseName = "ServerSideScripts";
     private static final String collectionName = "jsexamples";
 
-	private static final String Int = null;
     private String collectionLink;
-    private FeedOptions queryOptions = new FeedOptions();
     final CountDownLatch successfulCompletionLatch = new CountDownLatch(1);
-
+    
     public ScriptManager() throws InterruptedException{
         client = new AsyncDocumentClient.Builder()
         .withServiceEndpoint(AccountSettings.HOST)
@@ -110,9 +96,8 @@ public class ScriptManager {
 
     public void RunSimpleScript() throws IOException, InterruptedException{
         // 1. Create stored procedure for script.
-        ClassLoader classLoader = getClass().getClassLoader();
+        ClassLoader classLoader = getClass().getClassLoader();        
         File file = new File(classLoader.getResource("JS/SimpleScript.js").getFile());
-        file.getPath();
 
         String scriptBody = new String(Files.readAllBytes(Paths.get(file.getPath())), StandardCharsets.UTF_8);
         String scriptId = file.getName();
@@ -121,10 +106,10 @@ public class ScriptManager {
         sproc.setId(FilenameUtils.removeExtension(scriptId));
         sproc.setBody(scriptBody);
 
-        //TryDeleteStoredProcedure(collectionLink, sproc.getId());
+        TryDeleteStoredProcedure(collectionLink + "/sprocs/" + sproc.getId(), sproc.getId());
 
         client.createStoredProcedure(collectionLink, sproc, null).subscribe(spResultPage -> {
-            System.out.println("\n " + "stored procedure created " + spResultPage.getActivityId() + "\n");
+            System.out.println("\n" + "Stored procedure created " + spResultPage.getActivityId() + "\n");
         });
         // 2. Create a document.
 
@@ -156,66 +141,6 @@ public class ScriptManager {
         });
     }
     
-    public void BulkImport() throws IOException, InterruptedException{
-        ClassLoader classLoader = getClass().getClassLoader();
-        int maxFiles = 2000;
-        int maxScriptSize = 50000;
-
-        // 1. Get the files.
-        File folder = new File(classLoader.getResource("Data").getFile());
-        File[] fileNames = folder.listFiles();
-
-        // 2. Prepare for import.
-        int currentCount = 0;
-        int fileCount = maxFiles != 0 ? Math.min(maxFiles, fileNames.length) : fileNames.length;
-
-
-        // 3. Create stored procedure for this script.
-        
-        File file = new File(classLoader.getResource("JS/BulkImport.js").getFile());
-
-        String scriptBody = new String(Files.readAllBytes(Paths.get(file.getPath())), StandardCharsets.UTF_8);
-        String scriptId = file.getName();
-
-        StoredProcedure sproc = new StoredProcedure();
-        sproc.setId(FilenameUtils.removeExtension(scriptId));
-        sproc.setBody(scriptBody);
-
-        client.createStoredProcedure(collectionLink, sproc, null).subscribe(spResultPage -> {
-            System.out.println("\n " + "stored procedure created " + spResultPage.getActivityId() + "\n");
-        });
-        TimeUnit.SECONDS.sleep(5);
-        // 4. Create a batch of docs (MAX is limited by request size (2M) and to script for execution.           
-            // We send batches of documents to create to script.
-            // Each batch size is determined by MaxScriptSize.
-            // MaxScriptSize should be so that:
-            // -- it fits into one request (MAX reqest size is 16Kb).
-            // -- it doesn't cause the script to time out.
-            // -- it is possible to experiment with MaxScriptSize to get best perf given number of throttles, etc.
-            ObjectMapper objectMapper = new ObjectMapper();
-            int currentlyInserted = 0;
-            
-                
-            // 5. Create args for current batch.
-            //    Note that we could send a string with serialized JSON and JSON.parse it on the script side,
-            //    but that would cause script to run longer. Since script has timeout, unload the script as much
-            //    as we can and do the parsing by client and framework. The script will get JavaScript objects.
-            CreateBulkInsertScriptArguments(fileNames, currentCount, fileCount, maxScriptSize);
-            // 6. execute the batch.
-            
-
-            
-        
-       
-            TimeUnit.SECONDS.sleep(3);
-            client.queryDocuments(collectionLink,
-            "SELECT * FROM root r", null).subscribe(queryResultPage -> {
-                System.out.println("Found " + queryResultPage.getResults().size() + " documents in the collection. There were originally  " + fileCount + "  files in the Data directory\r\n");
-            });
-
-    }
-
-    
     private void cleanUpGeneratedDatabases() {
         
         String[] allDatabaseIds = { databaseName };
@@ -236,41 +161,10 @@ public class ScriptManager {
             }
         }
     }
-    private void TryDeleteStoredProcedure(String collectionLink, String storedProcedureName){
-        Observable<ResourceResponse<StoredProcedure>> sprocObservable = client.deleteStoredProcedure(collectionLink, null);
+    private void TryDeleteStoredProcedure(String sprocLink, String storedProcedureName){
+        Observable<ResourceResponse<StoredProcedure>> sprocObservable = client.deleteStoredProcedure(sprocLink, null);
         sprocObservable.subscribe(spResultPage -> {
             System.out.println("stored procedure deleted.");
         });
     }
-    /*
-    private Object[] CreateBulkInsertScriptArguments(File[] docFileNames, int currentIndex, int maxCount, int maxScriptSize) throws IOException{
-        ArrayList<String> jsonObjects = new ArrayList<String>();
-        //jsonDocumentArray.append("[");
-
-        int i = 1;
-        while ((currentIndex + i) < maxCount)
-        {
-            StringBuilder jsonDocumentArray = new StringBuilder();
-            jsonDocumentArray.append(new String(Files.readAllBytes(Paths.get(docFileNames[currentIndex + i].getPath())), StandardCharsets.UTF_8));
-            Object[] args = {jsonDocumentArray.toString()};
-            client.executeStoredProcedure(collectionLink + "/sprocs/BulkImport", args)
-            .subscribe(storedProcedureResponse -> {
-                successfulCompletionLatch.countDown();
-                //currentlyInserted = storedProcResultAsInt;
-            }, error -> {
-                System.err.println("an error occurred while executing the stored procedure: actual cause: "
-                        + error.getMessage());
-            });
-
-            jsonObjects.add(jsonDocumentArray.toString());
-            jsonDocumentArray.setLength(0);
-            i++;
-            
-        }
-
-        //jsonDocumentArray.append("]");
-        Object[] jsonArrayObjects = jsonObjects.toArray();
-        System.out.println(jsonArrayObjects[2]);
-        return jsonArrayObjects;
-    }*/
 }

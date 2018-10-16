@@ -20,26 +20,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package com.microsoft.azure.cosmosdb.sample;
 
-import java.io.PrintStream;
+import org.apache.commons.lang3.StringUtils;
 
-public class Main {
-    /*
-     * 
-     * @param args
-     */
-    public static void main(String[] args) throws InterruptedException {   
-        ScriptManager scriptManager = new ScriptManager();
-        
-        try{
-            //Add ScriptManager call here
-            scriptManager.RunSimpleScript();
+public class AccountSettings {
+    // Replace MASTER_KEY and HOST with values from your Azure Cosmos DB account.
+    // <!--[SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine")]-->
+    public static String MASTER_KEY =
+            System.getProperty("ACCOUNT_KEY", 
+                    StringUtils.defaultString(StringUtils.trimToNull(
+                            System.getenv().get("ACCOUNT_KEY")),
+                            "YEmh3SaBXA4TbmsihO9eXnxufJrCgQzZIoWWYhNkByYHLT6M5hd9o7Fv1sFy0ChNvuSY2TiuODS99qofEKxHVQ=="));
 
-        }catch(Exception ex){
-            System.out.println("An error occurred. \n" + ex.getMessage() + "\n ");
-            ex.printStackTrace(System.out);
-        }  
-    }
+    public static String HOST =
+            System.getProperty("ACCOUNT_HOST",
+                    StringUtils.defaultString(StringUtils.trimToNull(
+                            System.getenv().get("ACCOUNT_HOST")),
+                            "https://jabcos4.documents.azure.com:443/"));
 }
