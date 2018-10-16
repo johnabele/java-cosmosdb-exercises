@@ -28,15 +28,9 @@ public class Main {
      * 
      * @param args
      */
-    public static void main(String[] args) {   
-        //QueryManager queryManager = new QueryManager();
-        
-        try{
-            //Add QueryManager call here
-            System.out.println("hello world");
+    public static void main(String[] args) { 
 
-        }catch(Exception ex){
-            System.out.println("An error occurred.");
-        }  
+        //Add QueryManager call here
+    
     }
 }

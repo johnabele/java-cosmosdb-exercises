@@ -36,8 +36,8 @@ public class QueryManager {
     public static AsyncDocumentClient client;
     
     // Assign a variable for your database & collection 
-    private static final String databaseName = "<databaseId>";
-    private static final String collectionName = "<collectionId>";
+    private static final String databaseId = "<databaseId>";
+    private static final String collectionId = "<collectionId>";
     private String collectionLink;
     private FeedOptions queryOptions = new FeedOptions();
 
@@ -49,7 +49,7 @@ public class QueryManager {
         .withConsistencyLevel(ConsistencyLevel.Session)
         .build();
 
-        collectionLink = String.format("/dbs/%s/colls/%s", databaseName, collectionName);
+        collectionLink = String.format("/dbs/%s/colls/%s", databaseId, collectionId);
         
         queryOptions.setMaxItemCount(500);
         queryOptions.setEnableCrossPartitionQuery(true);   
@@ -95,7 +95,7 @@ public class QueryManager {
         queryObservable.subscribe(queryResultPage -> {
             System.out.println(callingMethodName + ": Got a page of query result with " + 
             queryResultPage.getResults().size() + " document(s)" + " and request charge of \u001B[46m \u001B[30m " + 
-            queryResultPage.getRequestCharge() + " \u001B[0m \u001B[40m" + " at " + client.getReadEndpoint());
+            queryResultPage.getRequestCharge() + " \u001B[0m \u001B[40m");
         });
     }
 }

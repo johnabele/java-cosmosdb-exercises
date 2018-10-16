@@ -242,6 +242,7 @@ public class ScriptManager {
             System.out.println("stored procedure deleted.");
         });
     }
+    /*
     private Object[] CreateBulkInsertScriptArguments(File[] docFileNames, int currentIndex, int maxCount, int maxScriptSize) throws IOException{
         ArrayList<String> jsonObjects = new ArrayList<String>();
         //jsonDocumentArray.append("[");
@@ -271,5 +272,5 @@ public class ScriptManager {
         Object[] jsonArrayObjects = jsonObjects.toArray();
         System.out.println(jsonArrayObjects[2]);
         return jsonArrayObjects;
-    }
+    }*/
 }
